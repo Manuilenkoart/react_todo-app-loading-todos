@@ -1,16 +1,24 @@
 import classNames from 'classnames';
 import { FC, memo, useEffect, useMemo, useState } from 'react';
 import { ActiveFilter, Todo } from '../types';
+import { makeFilterTodos } from '../utils/filters';
 
 type Props = {
   todos: Todo[];
-  onFilter: (filter: ActiveFilter) => void;
+  onFilter: (todo: Todo[]) => void;
 };
 
 export const Footer: FC<Props> = memo(({ todos, onFilter }) => {
   const [activeFilter, setActiveFilter] = useState<ActiveFilter>('all');
 
-  useEffect(() => onFilter(activeFilter), [activeFilter, onFilter]);
+  const todosFiltered = useMemo(
+    () => makeFilterTodos(todos, activeFilter),
+    [activeFilter, todos],
+  );
+
+  useEffect(() => {
+    onFilter(todosFiltered);
+  }, [onFilter, todosFiltered]);
 
   const itemsLeft = useMemo(
     () => todos.filter(({ completed }) => !completed).length,

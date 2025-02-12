@@ -1,17 +1,13 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
-/* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useCallback, useEffect, useState } from 'react';
 import { getTodos } from './api/todos';
 import { ErrorNotification, Footer, Header, TodoList } from './components';
-import { ActiveFilter, Todo } from './types';
-// import { todosMock } from './utils/mock';
+import { Todo } from './types';
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [todosFiltered, setTodosFiltered] = useState<Todo[]>([]);
 
   const [error, setError] = useState('');
-  // const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     getTodos()
@@ -22,25 +18,8 @@ export const App: React.FC = () => {
   const handleHideError = useCallback(() => setError(''), []);
 
   const handleFilter = useCallback(
-    (filter: ActiveFilter) => {
-      switch (filter) {
-        case 'active':
-          setTodosFiltered(todos.filter(({ completed }) => !completed));
-          break;
-
-        case 'completed':
-          setTodosFiltered(todos.filter(({ completed }) => completed));
-          break;
-
-        case 'all':
-          setTodosFiltered(todos);
-          break;
-
-        default:
-          break;
-      }
-    },
-    [todos],
+    (todo: Todo[]) => setTodosFiltered(todo),
+    [],
   );
 
   return (
