@@ -1,85 +1,69 @@
 import classNames from 'classnames';
-import { FC, memo, useEffect, useMemo, useState } from 'react';
-import { ActiveFilter, Todo } from '../types';
-import { makeFilterTodos } from '../utils/filters';
+import { FC, memo } from 'react';
+import { ActiveFilter } from '../types';
 
 type Props = {
-  todos: Todo[];
-  onFilter: (todo: Todo[]) => void;
+  itemsLeft: number;
+  activeFilter: ActiveFilter;
+  hasTodo: boolean;
+  onFilterClick: (todo: ActiveFilter) => void;
 };
 
-export const Footer: FC<Props> = memo(({ todos, onFilter }) => {
-  const [activeFilter, setActiveFilter] = useState<ActiveFilter>('all');
+export const Footer: FC<Props> = memo(
+  ({ itemsLeft, activeFilter, hasTodo, onFilterClick }) => {
+    return hasTodo ? (
+      <footer className="todoapp__footer" data-cy="Footer">
+        <span className="todo-count" data-cy="TodosCounter">
+          {itemsLeft} items left
+        </span>
 
-  const todosFiltered = useMemo(
-    () => makeFilterTodos(todos, activeFilter),
-    [activeFilter, todos],
-  );
+        {/* Active link should have the 'selected' class */}
+        <nav className="filter" data-cy="Filter">
+          <a
+            href="#/"
+            className={classNames('filter__link ', {
+              selected: activeFilter === 'all',
+            })}
+            data-cy="FilterLinkAll"
+            onClick={() => onFilterClick('all')}
+          >
+            All
+          </a>
 
-  useEffect(() => {
-    onFilter(todosFiltered);
-  }, [onFilter, todosFiltered]);
+          <a
+            href="#/active"
+            className={classNames('filter__link ', {
+              selected: activeFilter === 'active',
+            })}
+            data-cy="FilterLinkActive"
+            onClick={() => onFilterClick('active')}
+          >
+            Active
+          </a>
 
-  const itemsLeft = useMemo(
-    () => todos.filter(({ completed }) => !completed).length,
-    [todos],
-  );
+          <a
+            href="#/completed"
+            className={classNames('filter__link ', {
+              selected: activeFilter === 'completed',
+            })}
+            data-cy="FilterLinkCompleted"
+            onClick={() => onFilterClick('completed')}
+          >
+            Completed
+          </a>
+        </nav>
 
-  const handleActiveFilterClick = (filter: ActiveFilter) =>
-    setActiveFilter(filter);
-
-  return todos.length ? (
-    <footer className="todoapp__footer" data-cy="Footer">
-      <span className="todo-count" data-cy="TodosCounter">
-        {itemsLeft} items left
-      </span>
-
-      {/* Active link should have the 'selected' class */}
-      <nav className="filter" data-cy="Filter">
-        <a
-          href="#/"
-          className={classNames('filter__link ', {
-            selected: activeFilter === 'all',
-          })}
-          data-cy="FilterLinkAll"
-          onClick={() => handleActiveFilterClick('all')}
+        {/* this button should be disabled if there are no completed todos */}
+        <button
+          type="button"
+          className="todoapp__clear-completed"
+          data-cy="ClearCompletedButton"
         >
-          All
-        </a>
-
-        <a
-          href="#/active"
-          className={classNames('filter__link ', {
-            selected: activeFilter === 'active',
-          })}
-          data-cy="FilterLinkActive"
-          onClick={() => handleActiveFilterClick('active')}
-        >
-          Active
-        </a>
-
-        <a
-          href="#/completed"
-          className={classNames('filter__link ', {
-            selected: activeFilter === 'completed',
-          })}
-          data-cy="FilterLinkCompleted"
-          onClick={() => handleActiveFilterClick('completed')}
-        >
-          Completed
-        </a>
-      </nav>
-
-      {/* this button should be disabled if there are no completed todos */}
-      <button
-        type="button"
-        className="todoapp__clear-completed"
-        data-cy="ClearCompletedButton"
-      >
-        Clear completed
-      </button>
-    </footer>
-  ) : null;
-});
+          Clear completed
+        </button>
+      </footer>
+    ) : null;
+  },
+);
 
 Footer.displayName = 'FooterMemo';

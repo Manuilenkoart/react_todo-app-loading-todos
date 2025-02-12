@@ -1,11 +1,12 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { getTodos } from './api/todos';
 import { ErrorNotification, Footer, Header, TodoList } from './components';
-import { Todo } from './types';
+import { ActiveFilter, Todo } from './types';
+import { makeFilterTodos } from './utils/filters';
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [todosFiltered, setTodosFiltered] = useState<Todo[]>([]);
+  const [activeFilter, setActiveFilter] = useState<ActiveFilter>('all');
 
   const [error, setError] = useState('');
 
@@ -17,10 +18,17 @@ export const App: React.FC = () => {
 
   const handleHideError = useCallback(() => setError(''), []);
 
-  const handleFilter = useCallback(
-    (todo: Todo[]) => setTodosFiltered(todo),
-    [],
+  const todosFiltered = useMemo(
+    () => makeFilterTodos(todos, activeFilter),
+    [activeFilter, todos],
   );
+
+  const todosActive = useMemo(
+    () => todos.filter(({ completed }) => !completed),
+    [todos],
+  );
+
+  const handleFilterClick = (filter: ActiveFilter) => setActiveFilter(filter);
 
   return (
     <div className="todoapp">
@@ -30,7 +38,12 @@ export const App: React.FC = () => {
         <Header todos={todos} />
 
         <TodoList todos={todosFiltered} />
-        <Footer todos={todos} onFilter={handleFilter} />
+        <Footer
+          hasTodo={!!todos.length}
+          itemsLeft={todosActive.length}
+          activeFilter={activeFilter}
+          onFilterClick={handleFilterClick}
+        />
       </div>
 
       <ErrorNotification error={error} onHideError={handleHideError} />
